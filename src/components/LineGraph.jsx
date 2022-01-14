@@ -47,6 +47,7 @@ const options = {
     },
 };
 
+
 const buildChartData = (data, casesType) => {
     let chartData = [];
     let lastDataPoint;
@@ -63,12 +64,14 @@ const buildChartData = (data, casesType) => {
     return chartData;
 };
 
-function LineGraph({ casesType = "cases" }) {
+function LineGraph({ casesType = "cases", ...props }) {
     const [data, setData] = useState({});
+    const [backgroundColor, setbackgroundColor] = useState("cases")
+    const [borderColor, setborderColor] = useState()
 
     useEffect(() => {
         const fetchData = async () => {
-            await fetch("https://disease.sh/v3/covid-19/historical/all?lastdays=120")
+            await fetch("https://disease.sh/v3/covid-19/historical/all?lastdays=360")
                 .then((response) => {
                     return response.json();
                 })
@@ -77,19 +80,30 @@ function LineGraph({ casesType = "cases" }) {
                     setData(chartData);
                 });
         };
+        if (casesType === "cases") {
+            setbackgroundColor("rgba(204, 16, 52, 0.7)")
+            setborderColor("rgba(204, 16, 52)")
+        } else if (casesType === "recovered") {
+            setbackgroundColor("rgb(111, 216, 0, .7)")
+            setborderColor("rgb(111, 216, 0)")
+        } else {
+            setbackgroundColor("rgb(0, 0, 0, .7)")
+            setborderColor("rgb(0, 0, 0)")
+        }
+
         fetchData();
     }, [casesType]);
 
     return (
-        <div>
+        <div className={props.className}>
             {data?.length > 0 && (
                 <Line
                     options={options}
                     data={{
                         datasets: [
                             {
-                                backgroundColor: "rgba(204, 16, 52, 0.5)",
-                                borderColor: "#CC1034",
+                                backgroundColor: backgroundColor,
+                                borderColor: borderColor,
                                 data: data,
                             },
                         ],
